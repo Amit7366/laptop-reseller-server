@@ -13,6 +13,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send('dfsdfsdfResale server is running');
   });
+app.get('/test', (req, res) => {
+    res.send('dfsdfsdfResale server is running');
+  });
 
 
   app.listen(port, () => {
