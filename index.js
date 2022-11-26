@@ -20,8 +20,19 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
   try{
     const categoryCollecttion = client.db('reseller').collection('category');
+    const usersCollection = client.db('reseller').collection('users');
 
-    
+
+    app.post('/users', async (req,res) =>{
+
+      const user = req.body;
+      console.log(user);
+      const result = await usersCollection.insertOne(user);
+
+
+      res.send(result);
+    })
+
 
   }
   finally{
