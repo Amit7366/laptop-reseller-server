@@ -37,12 +37,12 @@ async function run() {
       res.send(result);
     });
 
-
-
-
-    
+    app.get("/products", async (req, res) => {
+      const query = {};
+      const doctors = await productCollecttion.find(query).toArray();
+      res.send(doctors);
+    });
   } finally {
-
   }
 }
 
