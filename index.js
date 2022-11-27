@@ -22,6 +22,7 @@ async function run() {
     const categoryCollecttion = client.db("reseller").collection("category");
     const productCollecttion = client.db("reseller").collection("products");
     const usersCollection = client.db("reseller").collection("users");
+    const bookingsCollection = client.db("reseller").collection("booking");
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -70,6 +71,23 @@ async function run() {
       const query = {};
       const ad = await categoryCollecttion.find(query).toArray();
       res.send(doctors);
+    })
+
+    app.post('/booking', async (req,res) =>{
+      const booking = req.body;
+            console.log(booking);
+            const query = {
+              productName: booking.productName
+            }
+
+            const alreadyBooked = await bookingsCollection.find(query).toArray();
+
+            if (alreadyBooked.length) {
+                const message = `Already  booked ${booking.productName}`
+                return res.send({ acknowledged: false, message })
+            }
+            const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
     })
 
 
