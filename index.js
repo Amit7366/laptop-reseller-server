@@ -42,6 +42,14 @@ async function run() {
       const doctors = await productCollecttion.find(query).toArray();
       res.send(doctors);
     });
+
+    app.post("/category", async (req, res) => {
+      const category = req.body;
+      const result = await categoryCollecttion.insertOne(category);
+      res.send(result);
+    });
+
+
   } finally {
   }
 }
