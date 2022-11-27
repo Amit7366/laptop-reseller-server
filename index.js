@@ -41,7 +41,7 @@ async function run() {
       const result = await productCollecttion.find(query).toArray();
       res.send(result);
     });
-    app.get("/verified/products", async (req, res) => {
+    app.get("/advertised/products", async (req, res) => {
       const query = {advertise: 'true'};
       const result = await productCollecttion.find(query).toArray();
       res.send(result);
@@ -56,6 +56,13 @@ async function run() {
     app.get("/category", async (req, res) => {
       const query = {};
       const result = await categoryCollecttion.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/category/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {category: id};
+      const result = await productCollecttion.find(query).toArray();
       res.send(result);
     });
 
