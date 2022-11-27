@@ -27,7 +27,6 @@ async function run() {
       const user = req.body;
       console.log(user);
       const result = await usersCollection.insertOne(user);
-
       res.send(result);
     });
 
@@ -39,8 +38,13 @@ async function run() {
 
     app.get("/products", async (req, res) => {
       const query = {};
-      const doctors = await productCollecttion.find(query).toArray();
-      res.send(doctors);
+      const result = await productCollecttion.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/verified/products", async (req, res) => {
+      const query = {advertise: 'true'};
+      const result = await productCollecttion.find(query).toArray();
+      res.send(result);
     });
 
     app.post("/category", async (req, res) => {
@@ -48,6 +52,18 @@ async function run() {
       const result = await categoryCollecttion.insertOne(category);
       res.send(result);
     });
+
+    app.get("/category", async (req, res) => {
+      const query = {};
+      const result = await categoryCollecttion.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get('/advertise', async(req,res) =>{
+      const query = {};
+      const ad = await categoryCollecttion.find(query).toArray();
+      res.send(doctors);
+    })
 
 
   } finally {
