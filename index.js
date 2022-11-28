@@ -45,6 +45,21 @@ async function run() {
     const wishlistCollection = client.db("reseller").collection("wishlist");
     const paymentCollection = client.db("reseller").collection("payment");
 
+    const verifyAdmin = async (req,res,next) =>{
+           
+      const decodedEmail = req.decoded.email;
+      const query = {email : decodedEmail};
+
+      const user = await usersCollection.findOne(query);
+
+      console.log(user.role)
+
+      if(user?.role !== 'admin'){
+          return res.status(403).send({message: "Forbiden Access"})
+      }
+      next();
+  }
+
     /**
      * User API
      *
@@ -194,6 +209,13 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
 
+});
+
+app.get('/users/admin/:email', async (req, res) => {
+  const email = req.params.email;
+  const query = { email }
+  const user = await usersCollection.findOne(query);
+  res.send({ isAdmin: user?.role === 'admin' });
 })
 
 
@@ -299,7 +321,7 @@ app.post('/payments', async (req,res) =>{
       res.send(result);
     });
 
-    app.delete("/buyer/:id", async (req, res) => {
+    app.delete("/buyer/:id",verifyJWT,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter);
