@@ -10,6 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.7dm94fg.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -41,6 +43,7 @@ async function run() {
     const usersCollection = client.db("reseller").collection("users");
     const bookingsCollection = client.db("reseller").collection("booking");
     const wishlistCollection = client.db("reseller").collection("wishlist");
+    const paymentCollection = client.db("reseller").collection("payment");
 
     /**
      * User API
@@ -167,6 +170,53 @@ async function run() {
       res.send(updateResult);
     });
 
+    app.get('/bookings/:id', async (req,res) =>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const booking = await bookingsCollection.findOne(query);
+      res.send(booking);
+  });
+
+  app.post('/create-payment-intent', async (req,res) =>{
+    const booking  = req.body;
+    const price = booking.productPrice;
+    const amount= price * 100;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: amount,  
+        "payment_method_types": [
+            "card"
+          ],
+    });
+
+    res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+
+})
+
+
+app.post('/payments', async (req,res) =>{
+    const payment  = req.body;
+
+    const result = await paymentCollection.insertOne(payment);
+
+    const id = payment.bookingId;
+    const options = { upsert: true };
+    const query  = {_id: ObjectId(id)};
+
+    const updateDoc = {
+        $set:{
+            paid: true,
+            transactionId: payment.transactionId,
+        }
+    }
+    const updatedResult = await bookingsCollection.updateOne(query,updateDoc,options)
+
+    res.send(result);
+})
+
     /**
      * Seller API
      *
@@ -250,6 +300,12 @@ async function run() {
     });
 
     app.delete("/buyer/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+    });
+    app.delete("/seller/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter);
