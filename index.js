@@ -113,8 +113,14 @@ async function run() {
         return res.send({ acknowledged: false, message });
       }
 
-      const filter = { _id: ObjectId(booking._id) };
-      const options = { upsert: true };
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
+
+    app.put("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+     
       const updatedDoc = {
         $set: {
           status: "booked",
@@ -122,12 +128,10 @@ async function run() {
       };
       const updateResult = await productCollecttion.updateOne(
         filter,
-        updatedDoc,
-        options
+        updatedDoc
       );
 
-      const result = await bookingsCollection.insertOne(booking);
-      res.send(result);
+      res.send(updateResult);
     });
 
     app.get("/booking", async (req, res) => {
