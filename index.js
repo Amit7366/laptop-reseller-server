@@ -214,6 +214,12 @@ async function run() {
     res.send(result);
   });
 
+  app.get("/wishlist", async (req, res) => {
+    const query = {};
+    const result = await wishlistCollection.find(query).toArray();
+    res.send(result);
+  });
+
 
 
 
