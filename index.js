@@ -36,12 +36,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/user', async (req,res) =>{
+    app.get("/user", async (req, res) => {
       const email = req.query.email;
-      const query = {email: email};
+      const query = { email: email };
       const result = await usersCollection.count(query);
-      res.send({ feedback: result});
-    })
+      res.send({ feedback: result });
+    });
 
     /**
      * Product API
@@ -112,6 +112,20 @@ async function run() {
         const message = `Already  booked ${booking.productName}`;
         return res.send({ acknowledged: false, message });
       }
+
+      const filter = { _id: ObjectId(booking._id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          status: "booked",
+        },
+      };
+      const updateResult = await productCollecttion.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+
       const result = await bookingsCollection.insertOne(booking);
       res.send(result);
     });
@@ -125,42 +139,56 @@ async function run() {
       res.send(result);
     });
 
-        /** 
+    /**
      * Seller API
-     * 
-     * */ 
+     *
+     * */
 
-        app.get('/seller', async(req,res) =>{
-          const query = {role: 'seller'};
+    app.get("/seller", async (req, res) => {
+      const query = { role: "seller" };
 
-          const result = await usersCollection.find(query).toArray();
-          res.send(result);
-        });
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/buyer", async (req, res) => {
+      const query = { role: "buyer" };
 
-        app.get('/seller/:email', async( req,res) =>{
-          const email  = req.params.email;
-          const query = {email: email};
-
-          const result = await usersCollection.findOne(query);
-          res.send(result);
-        })
-
-        app.put('/seller/:id', async (req, res) => {
-          const id = req.params.id;
-          const filter = { _id: ObjectId(id) }
-          const options = { upsert: true };
-          const updatedDoc = {
-              $set: {
-                status: 'verified'
-              }
-          }
-          const result = await usersCollection.updateOne(filter, updatedDoc, options);
-          res.send(result);
-      });
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
 
 
+    app.get("/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
 
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
 
+    app.put("/seller/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          status: "verified",
+        },
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    app.delete('/buyer/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+  })
   } finally {
   }
 }
