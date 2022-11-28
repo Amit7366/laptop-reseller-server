@@ -24,6 +24,11 @@ async function run() {
     const usersCollection = client.db("reseller").collection("users");
     const bookingsCollection = client.db("reseller").collection("booking");
 
+    /**
+     * User API
+     *
+     * */
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       console.log(user);
@@ -31,6 +36,10 @@ async function run() {
       res.send(result);
     });
 
+    /**
+     * Product API
+     *
+     * */
     app.post("/products", async (req, res) => {
       const product = req.body;
       const result = await productCollecttion.insertOne(product);
@@ -43,10 +52,15 @@ async function run() {
       res.send(result);
     });
     app.get("/advertised/products", async (req, res) => {
-      const query = {advertise: 'true'};
+      const query = { advertise: "true" };
       const result = await productCollecttion.find(query).toArray();
       res.send(result);
     });
+
+    /**
+     * category API
+     *
+     * */
 
     app.post("/category", async (req, res) => {
       const category = req.body;
@@ -62,42 +76,61 @@ async function run() {
 
     app.get("/category/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {category: id};
+      const query = { category: id };
       const result = await productCollecttion.find(query).toArray();
       res.send(result);
     });
 
-    app.get('/advertise', async(req,res) =>{
+    app.get("/advertise", async (req, res) => {
       const query = {};
       const ad = await categoryCollecttion.find(query).toArray();
       res.send(doctors);
-    })
+    });
 
-    app.post('/booking', async (req,res) =>{
+    /**
+     * Booking API
+     *
+     * */
+
+    app.post("/booking", async (req, res) => {
       const booking = req.body;
-            console.log(booking);
-            const query = {
-              productName: booking.productName
-            }
+      console.log(booking);
+      const query = {
+        productName: booking.productName,
+      };
 
-            const alreadyBooked = await bookingsCollection.find(query).toArray();
+      const alreadyBooked = await bookingsCollection.find(query).toArray();
 
-            if (alreadyBooked.length) {
-                const message = `Already  booked ${booking.productName}`
-                return res.send({ acknowledged: false, message })
-            }
-            const result = await bookingsCollection.insertOne(booking);
-            res.send(result);
-    })
+      if (alreadyBooked.length) {
+        const message = `Already  booked ${booking.productName}`;
+        return res.send({ acknowledged: false, message });
+      }
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
 
-    app.get('/booking', async(req,res) =>{
+    app.get("/booking", async (req, res) => {
       const email = req.query.email;
-     
-      const query = {email: email};
+
+      const query = { email: email };
       const result = await bookingsCollection.find(query).toArray();
       console.log(result);
       res.send(result);
-    })
+    });
+
+        /** 
+     * Seller API
+     * 
+     * */ 
+
+        app.get('/seller', async(req,res) =>{
+          const query = {role: 'seller'};
+
+          const result = await usersCollection.find(query).toArray();
+          res.send(result);
+        })
+
+
 
 
   } finally {
