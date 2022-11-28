@@ -23,6 +23,7 @@ async function run() {
     const productCollecttion = client.db("reseller").collection("products");
     const usersCollection = client.db("reseller").collection("users");
     const bookingsCollection = client.db("reseller").collection("booking");
+    const wishlistCollection = client.db("reseller").collection("wishlist");
 
     /**
      * User API
@@ -192,7 +193,32 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter);
       res.send(result);
-  })
+  });
+
+
+  app.post("/wishlist", async (req, res) => {
+    const wishlist = req.body;
+    const query = {
+      productId: wishlist.productId,
+      userEmail: wishlist.userEmail,
+    };
+
+    const alreadyBooked = await wishlistCollection.find(query).toArray();
+
+    if (alreadyBooked.length) {
+      const message = `Already  Wished ${wishlist.productId}`;
+      return res.send({ acknowledged: false, message });
+    }
+
+    const result = await wishlistCollection.insertOne(wishlist);
+    res.send(result);
+  });
+
+
+
+
+
+
   } finally {
   }
 }
